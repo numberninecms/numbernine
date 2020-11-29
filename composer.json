@@ -1,0 +1,11 @@
+{
+    "name": "numberninecms/numbernine",
+    "type": "symfony-pack",
+    "license": "MIT",
+    "description": "NumberNine CMS",
+    "require": {
+        "numberninecms/cms": "*",
+        "numberninecms/chapterone": "*",
+        "numberninecms/faker": "*"
+    }
+}
