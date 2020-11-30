@@ -4,8 +4,8 @@
     "license": "MIT",
     "description": "NumberNine CMS",
     "require": {
-        "numberninecms/cms": "0.1.*-dev",
-        "numberninecms/chapterone": "0.1.*-dev",
-        "numberninecms/faker": "0.1.*-dev"
+        "numberninecms/cms": "^0.1",
+        "numberninecms/chapterone": "^0.1",
+        "numberninecms/faker": "^0.1"
     }
 }
