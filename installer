@@ -1,0 +1,61 @@
+#!/bin/bash
+
+if ! command -v composer &> /dev/null
+then
+    echo ''
+    echo -e '\033[37m\033[41m        \033[0m'
+    echo -e '\033[37m\033[41m Error! \033[0m \033[33mcomposer\033[0m could not be found. Install it at \033[33mhttps://getcomposer.org\033[0m'
+    echo -e '\033[37m\033[41m        \033[0m'
+    exit
+fi
+
+if [ $# -eq 0 ]; then
+    echo ''
+    echo -e '\033[37m\033[43m        \033[0m'
+    echo -e '\033[30m\033[43m Usage: \033[0m \033[33minstall\033[0m my_project\033[0m'
+    echo -e '\033[37m\033[43m        \033[0m'
+    exit
+fi
+
+tput civis
+
+echo ''
+echo -e '\033[30m\033[42m                             \033[0m'
+echo -e '\033[30m\033[42m  NumberNine is downloading  \033[0m'
+echo -e '\033[30m\033[42m                             \033[0m'
+echo ''
+echo "Creating new project in ./$1 directory."
+
+chars="◐◓◑◒"
+
+while :; do
+  for (( i=0; i<${#chars}; i++ )); do
+    sleep 0.5
+    echo -en "Please wait while downloading... ${chars:$i:1}" "\r"
+  done
+done &
+
+PID=$!
+
+{
+    composer create-project symfony/website-skeleton $1
+    cd $1
+    composer config extra.symfony.allow-contrib true
+    export SYMFONY_ENDPOINT=https://flex.symfony.com/r/github.com/symfony/recipes-contrib/1049
+    composer req numberninecms/numbernine
+    unset SYMFONY_ENDPOINT
+} &> /dev/null
+
+kill $PID
+
+echo ''
+echo ''
+echo -e '\033[37m\033[44m                             \033[0m'
+echo -e "\033[37m\033[44m     You're almost ready     \033[0m"
+echo -e '\033[37m\033[44m                             \033[0m'
+echo ''
+echo -e "  * \033[34mRun \033[33mcd $1 && php bin/console numbernine:docker:install\033[0m"
+echo ''
+echo -e '  * \033[34mRead\033[0m the documentation at  \033[33mhttps://numberninecms.github.io/\033[0m'
+
+tput cnorm
