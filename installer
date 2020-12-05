@@ -75,6 +75,11 @@ else
     echo 'Installing Docker environment...'
     echo ''
     bin/console numbernine:docker:install
+    echo -e '\033[37m\033[44m                             \033[0m'
+    echo -e "\033[37m\033[44m What's next?                \033[0m"
+    echo -e '\033[37m\033[44m                             \033[0m'
+    echo ''
+    echo -e '  * \033[34mRead\033[0m the documentation at \033[33mhttps://numberninecms.github.io/\033[0m'
 fi
 
 tput cnorm
