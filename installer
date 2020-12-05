@@ -74,7 +74,7 @@ else
     echo ''
     echo 'Installing Docker environment...'
     echo ''
-    bin/console numbernine:docker:install -v
+    bin/console numbernine:docker:install
 fi
 
 tput cnorm
