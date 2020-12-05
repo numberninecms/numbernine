@@ -9,20 +9,31 @@ then
     exit
 fi
 
-if [ $# -eq 0 ]; then
+{
+    echo "$1" | grep -Pq '^(?!-+)[\w_-]+$'
+    RESULT=$?
+} &> /dev/null
+
+DOCKER=0
+
+if [ "$2" = "--docker" ]; then
+    DOCKER=1
+fi
+
+if [ $# -eq 0 ] || [ $# -gt 2 ] || [ $RESULT -gt 0 ]; then
     echo ''
-    echo -e '\033[37m\033[43m        \033[0m'
-    echo -e '\033[30m\033[43m Usage: \033[0m \033[33minstall\033[0m my_project\033[0m'
-    echo -e '\033[37m\033[43m        \033[0m'
+    echo -e '\033[30m\033[43m        \033[0m'
+    echo -e '\033[30m\033[43m Usage: \033[0m \033[33minstall\033[0m my_project \033[36m[-d|--docker]\033[0m'
+    echo -e '\033[30m\033[43m        \033[0m'
     exit
 fi
 
 tput civis
 
 echo ''
-echo -e '\033[30m\033[42m                             \033[0m'
-echo -e '\033[30m\033[42m  NumberNine is downloading  \033[0m'
-echo -e '\033[30m\033[42m                             \033[0m'
+echo -e '\033[30m\033[42m                                                                                                                        \033[0m'
+echo -e '\033[30m\033[42m NumberNine installation in progress                                                                                    \033[0m'
+echo -e '\033[30m\033[42m                                                                                                                        \033[0m'
 echo ''
 echo "Creating new project in ./$1 directory."
 
@@ -42,20 +53,28 @@ PID=$!
     cd $1
     composer config extra.symfony.allow-contrib true
     export SYMFONY_ENDPOINT=https://flex.symfony.com/r/github.com/symfony/recipes-contrib/1049
-    composer req numberninecms/numbernine
+    composer req numberninecms/numbernine --ignore-platform-reqs
     unset SYMFONY_ENDPOINT
 } &> /dev/null
 
 kill $PID
 
-echo ''
-echo ''
-echo -e '\033[37m\033[44m                             \033[0m'
-echo -e "\033[37m\033[44m     You're almost ready     \033[0m"
-echo -e '\033[37m\033[44m                             \033[0m'
-echo ''
-echo -e "  * \033[34mRun \033[33mcd $1 && php bin/console numbernine:docker:install\033[0m"
-echo ''
-echo -e '  * \033[34mRead\033[0m the documentation at \033[33mhttps://numberninecms.github.io/\033[0m'
+if [ $DOCKER -eq 0 ]; then
+    echo ''
+    echo ''
+    echo -e '\033[37m\033[44m                             \033[0m'
+    echo -e "\033[37m\033[44m     You're almost ready     \033[0m"
+    echo -e '\033[37m\033[44m                             \033[0m'
+    echo ''
+    echo -e "  * \033[34mRun \033[33mcd $1 && php bin/console numbernine:docker:install\033[0m"
+    echo ''
+    echo -e '  * \033[34mRead\033[0m the documentation at \033[33mhttps://numberninecms.github.io/\033[0m'
+else
+    echo ''
+    echo ''
+    echo 'Installing Docker environment...'
+    echo ''
+    bin/console numbernine:docker:install -v
+fi
 
 tput cnorm
