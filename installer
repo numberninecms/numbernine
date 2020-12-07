@@ -10,6 +10,8 @@ green='\033[32m'
 clr='\033[0m'
 verbose=false
 full_install=false
+uid=$(id -u)
+gid=$(id -g)
 
 function check_requirements {
     if ! command -v docker &> /dev/null
@@ -73,7 +75,7 @@ function spinner {
 }
 
 function dcomposer {
-    docker run --rm --name numbernine_installer -u '1000:1000' \
+    docker run --rm --name numbernine_installer -u "$uid:$gid" \
         -e SYMFONY_ENDPOINT=https://flex.symfony.com/r/github.com/symfony/recipes-contrib/1049 \
         -v $PWD:/srv/app -w /srv/app numberninecms/php:7.4-fpm-dev composer $@;
 }
