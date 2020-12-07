@@ -112,7 +112,7 @@ function main {
     kill $PID
     tput cnorm
 
-    if [ full_install ]; then
+    if [ $full_install = true ]; then
         if [ $verbose = true ]; then
             verbosity='-v'
         fi
