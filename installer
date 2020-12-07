@@ -43,7 +43,7 @@ function spinner {
 }
 
 function dcomposer {
-    docker run --rm --name numbernine_installer -it -u '1000:1000' \
+    docker run --rm --name numbernine_installer -u '1000:1000' \
         -e SYMFONY_ENDPOINT=https://flex.symfony.com/r/github.com/symfony/recipes-contrib/1049 \
         -v $PWD:/srv/app -w /srv/app numberninecms/php:7.4-fpm-dev composer $@;
 }
