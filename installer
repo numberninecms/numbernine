@@ -111,11 +111,14 @@ function main {
     tput cnorm
 
     if [ full_install ]; then
+        if [ $verbose = true ]; then
+            verbosity='-v'
+        fi
         echo ''
         echo ''
         echo 'Installing Docker environment...'
         echo ''
-        execute bin/console numbernine:docker:install
+        bin/console numbernine:docker:install $verbosity
         echo ''
         echo -e "$info                             $clr"
         echo -e "$info What's next?                $clr"
