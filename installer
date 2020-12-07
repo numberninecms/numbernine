@@ -1,35 +1,65 @@
 #!/bin/bash
 
-if ! command -v docker &> /dev/null
-then
-    echo ''
-    echo -e '\033[37m\033[41m        \033[0m'
-    echo -e '\033[37m\033[41m Error! \033[0m \033[33mDocker\033[0m could not be found. Install it at \033[33mhttps://www.docker.com/get-started\033[0m'
-    echo -e '\033[37m\033[41m        \033[0m'
-    exit
-fi
+error='\033[37m\033[41m'
+success='\033[30m\033[42m'
+warning='\033[30m\033[43m'
+info='\033[37m\033[44m'
+blue='\033[34m'
+yellow='\033[33m'
+green='\033[32m'
+clr='\033[0m'
+verbose=false
+full_install=false
 
-if ! command -v docker-compose &> /dev/null
-then
-    echo ''
-    echo -e '\033[37m\033[41m        \033[0m'
-    echo -e '\033[37m\033[41m Error! \033[0m \033[33mdocker-compose\033[0m could not be found. Install it at \033[33mhttps://docs.docker.com/compose/install/\033[0m'
-    echo -e '\033[37m\033[41m        \033[0m'
-    exit
-fi
+function check_requirements {
+    if ! command -v docker &> /dev/null
+    then
+        echo ''
+        echo -e "$error        $clr"
+        echo -e "$error Error! $clr ${yellow}Docker$clr could not be found. Install it at ${yellow}https://www.docker.com/get-started$clr"
+        echo -e "$error        $clr"
+        exit
+    fi
 
-{
-    echo "$1" | grep -Pq '^(?!-+)[\w_-]+$'
-    RESULT=$?
-} &> /dev/null
+    if ! command -v docker-compose &> /dev/null
+    then
+        echo ''
+        echo -e "$error        $clr"
+        echo -e "$error Error! $clr ${yellow}docker-compose$clr could not be found. Install it at ${yellow}https://docs.docker.com/compose/install/$clr"
+        echo -e "$error        $clr"
+        exit
+    fi
+}
 
-if [ $# -eq 0 ] || [ $# -gt 2 ] || [ $RESULT -gt 0 ]; then
-    echo ''
-    echo -e '\033[30m\033[43m        \033[0m'
-    echo -e '\033[30m\033[43m Usage: \033[0m \033[33minstall\033[0m my_project \033[36m--full-install\033[0m'
-    echo -e '\033[30m\033[43m        \033[0m'
-    exit
-fi
+function usage {
+    {
+        echo "$1" | grep -Pq '^(?!-+)[\w_-]+$'
+        RESULT=$?
+    } &> /dev/null
+
+    if [ $# -eq 0 ] || [ $RESULT -gt 0 ]; then
+        echo ''
+        echo -e "$warning        $clr"
+        echo -e "$warning Usage: $clr ${yellow}install$clr my_project [options]"
+        echo -e "$warning        $clr"
+        echo ''
+        echo -e "${yellow}Options:$clr"
+        echo -e "  ${green}-f, --full-install$clr  Run the complete installation including containers creation"
+        echo -e "  ${green}-v, --verbose$clr       Verbose output"
+        echo ''
+        exit
+    fi
+}
+
+function parse_options {
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            -f|--full-install) full_install=true ;;
+            -v|--verbose) verbose=true ;;
+        esac
+        shift
+    done
+}
 
 function spinner {
     chars="◐◓◑◒"
@@ -48,47 +78,61 @@ function dcomposer {
         -v $PWD:/srv/app -w /srv/app numberninecms/php:7.4-fpm-dev composer $@;
 }
 
-tput civis
+function execute {
+    if [ $verbose = true ] ; then
+        "$@"
+    else
+        "$@" > /dev/null 2>&1
+    fi
+}
 
-echo ''
-echo -e '\033[30m\033[42m                                                                                                                        \033[0m'
-echo -e '\033[30m\033[42m NumberNine installation in progress                                                                                    \033[0m'
-echo -e '\033[30m\033[42m                                                                                                                        \033[0m'
-echo ''
-echo "Creating new project in ./$1 directory."
-spinner 'Please wait while preparing your project...' &
-PID=$!
+function main {
+    check_requirements
+    usage $@
+    parse_options $@
 
-{
-    mkdir -p $1 && cd $1
-    dcomposer create-project symfony/website-skeleton .
-    dcomposer config extra.symfony.allow-contrib true
-    dcomposer req numberninecms/numbernine
-} &> /dev/null
+    tput civis
 
-kill $PID
-tput cnorm
+    echo ''
+    echo -e "$success                                                                                                                        $clr"
+    echo -e "$success NumberNine installation in progress                                                                                    $clr"
+    echo -e "$success                                                                                                                        $clr"
+    echo ''
+    echo "Creating new project in ./$1 directory."
+    spinner 'Please wait while preparing your project...' &
+    PID=$!
 
-if [ "$2" = "--full-install" ]; then
-    echo ''
-    echo ''
-    echo 'Installing Docker environment...'
-    echo ''
-    bin/console numbernine:docker:install
-    echo ''
-    echo -e '\033[37m\033[44m                             \033[0m'
-    echo -e "\033[37m\033[44m What's next?                \033[0m"
-    echo -e '\033[37m\033[44m                             \033[0m'
-    echo ''
-    echo -e '  * \033[34mRead\033[0m the documentation at \033[33mhttps://numberninecms.github.io/\033[0m'
-else
-    echo ''
-    echo ''
-    echo -e '\033[37m\033[44m                             \033[0m'
-    echo -e "\033[37m\033[44m     You're almost ready     \033[0m"
-    echo -e '\033[37m\033[44m                             \033[0m'
-    echo ''
-    echo -e "  * \033[34mRun \033[33mcd $1 && php bin/console numbernine:docker:install\033[0m"
-    echo ''
-    echo -e '  * \033[34mRead\033[0m the documentation at \033[33mhttps://numberninecms.github.io/\033[0m'
-fi
+    execute mkdir -p $1 && cd $1
+    execute dcomposer create-project symfony/website-skeleton .
+    execute dcomposer config extra.symfony.allow-contrib true
+    execute dcomposer req numberninecms/numbernine
+
+    kill $PID
+    tput cnorm
+
+    if [ full_install ]; then
+        echo ''
+        echo ''
+        echo 'Installing Docker environment...'
+        echo ''
+        execute bin/console numbernine:docker:install
+        echo ''
+        echo -e "$info                             $clr"
+        echo -e "$info What's next?                $clr"
+        echo -e "$info                             $clr"
+        echo ''
+        echo -e "  * ${blue}Read$clr the documentation at ${yellow}https://numberninecms.github.io/$clr"
+    else
+        echo ''
+        echo ''
+        echo -e "$info                             $clr"
+        echo -e "$info     You're almost ready     $clr"
+        echo -e "$info                             $clr"
+        echo ''
+        echo -e "  * ${blue}Run ${yellow}cd $1 && php bin/console numbernine:docker:install$clr"
+        echo ''
+        echo -e "  * ${blue}Read$clr the documentation at ${yellow}https://numberninecms.github.io/$clr"
+    fi
+}
+
+main $@
