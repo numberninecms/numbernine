@@ -77,7 +77,7 @@ function spinner {
 function dcomposer {
     docker run --rm --name numbernine_installer -u "$uid:$gid" \
         -e SYMFONY_ENDPOINT=https://flex.symfony.com/r/github.com/symfony/recipes-contrib/1049 \
-        -v $PWD:/srv/app -w /srv/app numberninecms/php:7.4-fpm-dev composer $@;
+        -v "$PWD":/srv/app -w /srv/app numberninecms/php:7.4-fpm-dev composer "$@";
 }
 
 function execute {
@@ -90,8 +90,8 @@ function execute {
 
 function main {
     check_requirements
-    usage $@
-    parse_options $@
+    usage "$@"
+    parse_options "$@"
 
     tput civis
 
@@ -104,7 +104,7 @@ function main {
     spinner 'Please wait while preparing your project...' &
     PID=$!
 
-    execute mkdir -p $1 && cd $1
+    execute mkdir -p "$1" && cd "$1" || exit
     execute dcomposer create-project symfony/website-skeleton .
     execute dcomposer config extra.symfony.allow-contrib true
     execute dcomposer req numberninecms/numbernine
@@ -120,7 +120,7 @@ function main {
         echo ''
         echo 'Installing Docker environment...'
         echo ''
-        bin/console numbernine:docker:install $verbosity
+        bin/console numbernine:docker:install --app-name="$1" $verbosity
         echo ''
         echo -e "$info                             $clr"
         echo -e "$info What's next?                $clr"
@@ -140,4 +140,4 @@ function main {
     fi
 }
 
-main $@
+main "$@"
