@@ -5,7 +5,6 @@
     "description": "NumberNine CMS",
     "require": {
         "numberninecms/cms": "^0.1",
-        "numberninecms/chapterone": "^0.1",
-        "numberninecms/faker": "^0.1"
+        "numberninecms/chapterone": "^0.1"
     }
 }
