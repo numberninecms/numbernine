@@ -4,7 +4,7 @@
     "license": "MIT",
     "description": "NumberNine CMS",
     "require": {
-        "numberninecms/cms": "^0.1",
-        "numberninecms/chapterone": "^0.1"
+        "numberninecms/cms": "^0.2",
+        "numberninecms/chapterone": "^0.2"
     }
 }
